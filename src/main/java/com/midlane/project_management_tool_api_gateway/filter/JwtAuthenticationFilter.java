@@ -1,6 +1,5 @@
 package com.midlane.project_management_tool_api_gateway.filter;
 
-import com.midlane.project_management_tool_api_gateway.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -10,6 +9,9 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+
+import com.midlane.project_management_tool_api_gateway.util.JwtUtil;
+
 import reactor.core.publisher.Mono;
 
 @Component
@@ -26,6 +28,12 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+
+            // Skip JWT validation for /api/auth/** endpoints
+            String path = request.getPath().value();
+            if (path.startsWith("/api/auth/")) {
+                return chain.filter(exchange);
+            }
 
             if (!isAuthMissing(request)) {
                 final String token = getAuthHeader(request);

@@ -1,6 +1,5 @@
 package com.midlane.project_management_tool_api_gateway.config;
 
-import com.midlane.project_management_tool_api_gateway.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -9,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import com.midlane.project_management_tool_api_gateway.filter.JwtAuthenticationFilter;
 
 @Configuration
 public class GatewayConfig {
@@ -20,7 +21,7 @@ public class GatewayConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Auth service routes - no authentication required
-                .route("auth-service", r -> r.path("/auth/**")
+                .route("auth-service", r -> r.path("/api/auth/**")
                         .uri("http://localhost:8081"))
 
                 // User service routes - authentication required
