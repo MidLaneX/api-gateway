@@ -8,43 +8,84 @@ spring:
   cloud:
     gateway:
       routes:
+        # Auth service - NO JWT verification (forwarded directly to auth service)
         - id: auth-service
-          uri: http://localhost:8080
+          uri: http://host.docker.internal:8081
           predicates:
             - Path=/api/auth/**
+
+        # Health endpoints - NO JWT verification
+        - id: health-endpoints
+          uri: http://host.docker.internal:8080
+          predicates:
+            - Path=/actuator/health,/actuator/info
+
+        # Protected API routes - JWT verification REQUIRED
         - id: user-service
-          uri: http://localhost:8082
+          uri: http://host.docker.internal:8082
           predicates:
             - Path=/api/users/**
           filters:
-            - JwtAuthenticationFilter
+            - name: JwtAuthenticationFilter
+
         - id: project-service
           uri: http://localhost:8083
           predicates:
             - Path=/api/projects/**
           filters:
-            - JwtAuthenticationFilter
+            - name: JwtAuthenticationFilter
+
+        - id: task-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/tasks/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: notification-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+      # Global CORS configuration
       globalcors:
         cors-configurations:
           '[/**]':
-            allowed-origin-patterns: "*"
-            allowed-methods:
+            allowedOriginPatterns: "*"
+            allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
-            allowed-headers: "*"
-            allow-credentials: true
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
 
+# Server configuration
 server:
-  port: 8081
+  port: 8080
 
+# JWT Configuration
 jwt:
-  secret: mySecretKey
-  expiration: 86400000
+  secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
 
+# Logging configuration
 logging:
   level:
+    com.midlane.project_management_tool_api_gateway: DEBUG
     org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.client: DEBUG
+    org.springframework.security: DEBUG
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
