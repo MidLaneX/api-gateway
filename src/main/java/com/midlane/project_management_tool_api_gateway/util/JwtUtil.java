@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
@@ -18,6 +19,24 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private Long expiration;
+
+    @PostConstruct
+    public void validateConfiguration() {
+        if (secret == null || secret.trim().isEmpty()) {
+            throw new IllegalStateException("JWT secret must be configured in environment variables (JWT_SECRET)");
+        }
+
+        if (secret.length() < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 characters long for security");
+        }
+
+        // Warn if using default/weak secret
+        if (secret.contains("mySecretKey") || secret.contains("CHANGE_THIS")) {
+            System.err.println("WARNING: Using default/template JWT secret. Please change JWT_SECRET in production!");
+        }
+
+        System.out.println("JWT configuration validated successfully");
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -57,6 +76,7 @@ public class JwtUtil {
         try {
             return !isTokenExpired(token);
         } catch (Exception e) {
+            System.err.println("JWT validation failed: " + e.getMessage());
             return false;
         }
     }
