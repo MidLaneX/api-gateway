@@ -91,13 +91,16 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 // Extract user information and enrich request headers for downstream services
                 try {
                     String username = jwtUtil.extractUsername(token);
-                    logger.info("JWT validation successful for user: {} accessing path: {}", username, path);
+                    String role = jwtUtil.extractRole(token);
+                    logger.info("JWT validation successful for user: {} with role: {} accessing path: {}", username, role, path);
 
                     ServerHttpRequest modifiedRequest = request.mutate()
                             .header("X-User-Id", username)
                             .header("X-User-Name", username)
+                            .header("X-User-Role", role != null ? role : "USER")
                             .header("X-Request-Source", "api-gateway")
                             .header("X-Request-Time", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                            .header("X-Token-Type", "ACCESS")
                             .build();
 
                     return chain.filter(exchange.mutate().request(modifiedRequest).build());

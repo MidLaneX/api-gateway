@@ -15,12 +15,9 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchanges -> exchanges
-                        // Auth service endpoints - allow direct forwarding without JWT verification
-                        .pathMatchers("/api/auth/**").permitAll()
-                        // Health check endpoints - no authentication required
-                        .pathMatchers("/actuator/health", "/actuator/info").permitAll()
-                        // All other endpoints - JWT verification handled by custom filter in routes
-                        .anyExchange().authenticated()
+                        // All requests are permitted at Spring Security level
+                        // JWT verification is handled by custom JwtAuthenticationFilter in gateway routes
+                        .anyExchange().permitAll()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
