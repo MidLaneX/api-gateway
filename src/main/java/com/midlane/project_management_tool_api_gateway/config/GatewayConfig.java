@@ -9,10 +9,6 @@ import java.util.stream.Collectors;
 @Configuration
 public class GatewayConfig {
 
-    @Value("${cors.allowed.origins:http://localhost:5173}")
+    @Value("${cors.allowed.origins:http://localhost:3000}")
     private String allowedOrigins;
-
-    // Removed the custom CorsWebFilter bean to prevent conflicts
-    // CORS will be handled by Spring Cloud Gateway's built-in mechanism
-    // configured in application.yml
 }
