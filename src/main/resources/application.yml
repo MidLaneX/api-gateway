@@ -7,54 +7,56 @@ spring:
 
   cloud:
     gateway:
-      # Global CORS configuration
-      routes:
-        # Route all auth service traffic to user service
-        - id: auth-service-route
-          uri: http://localhost:8081 # User service port
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=0
+      server:
+        webflux:
+          # Global CORS configuration
+          routes:
+            # Route all auth service traffic to user service
+            - id: auth-service-route
+              uri: http://localhost:8081 # User service port
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=0
 
-        # User service routes (for non-auth endpoints if any)
-        - id: user-service-route
-          uri: http://localhost:8081
-          predicates:
-            - Path=/api/users/**
-          filters:
-            - StripPrefix=0
+            # User service routes (for non-auth endpoints if any)
+            - id: user-service-route
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/users/**
+              filters:
+                - StripPrefix=0
 
-        # Project service routes
-        - id: project-service-route
-          uri: http://localhost:8083
-          predicates:
-            - Path=/api/projects/**
-          filters:
-            - StripPrefix=0
+            # Project service routes
+            - id: project-service-route
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/projects/**
+              filters:
+                - StripPrefix=0
 
-        # Notification service routes
-        - id: notification-service-route
-          uri: http://localhost:8084
-          predicates:
-            - Path=/api/notifications/**
-          filters:
-            - StripPrefix=0
+            # Notification service routes
+            - id: notification-service-route
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/notifications/**
+              filters:
+                - StripPrefix=0
 
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "http://localhost:5173"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:3000"
+                  - "http://localhost:5173"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
 
 # Server configuration
 server:
