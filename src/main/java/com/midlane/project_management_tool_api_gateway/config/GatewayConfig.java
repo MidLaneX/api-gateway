@@ -21,12 +21,12 @@ public class GatewayConfig {
                 // Route all auth service traffic to user service
                 .route("auth-service-route", r -> r
                         .path("/api/auth/**")
-                        .uri("http://localhost:8081")
+                        .uri("http://localhost:8082")
                 )
                 // User service routes (for non-auth endpoints)
                 .route("user-service-route", r -> r
                         .path("/api/users/**")
-                        .uri("http://localhost:8081")
+                        .uri("http://localhost:8082")
                 )
                 // Project service routes
                 .route("project-service-route", r -> r
