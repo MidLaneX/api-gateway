@@ -7,7 +7,6 @@ spring:
 
   cloud:
     gateway:
-      # Global CORS configuration
       routes:
         # Route all auth service traffic to user service
         - id: auth-service-route
