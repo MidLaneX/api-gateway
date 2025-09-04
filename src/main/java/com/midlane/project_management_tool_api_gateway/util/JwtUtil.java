@@ -3,7 +3,6 @@ package com.midlane.project_management_tool_api_gateway.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,42 +29,39 @@ public class JwtUtil {
     @PostConstruct
     public void init() {
         try {
+            if (rsaPublicKeyString == null || rsaPublicKeyString.trim().isEmpty()) {
+                logger.error("RSA public key is not configured");
+                throw new RuntimeException("RSA public key is not configured");
+            }
             this.publicKey = decodePublicKey(rsaPublicKeyString);
-            logger.info("RSA public key loaded successfully for JWT validation");
+            logger.info("RSA public key loaded successfully");
         } catch (Exception e) {
-            logger.error("Failed to load RSA public key: {}", e.getMessage());
-            throw new IllegalStateException("Could not initialize RSA public key for JWT validation", e);
+            logger.error("Failed to load RSA public key: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize JWT utility", e);
         }
     }
 
-    private PublicKey decodePublicKey(String publicKeyString) throws Exception {
-        // Remove PEM header/footer and whitespace
-        String publicKeyPEM = publicKeyString
+    private PublicKey decodePublicKey(String keyString) throws Exception {
+        // Handle different newline formats and clean up the key string
+        String publicKeyPEM = keyString
+                .replace("\\n", "\n")  // Handle escaped newlines
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s", "");
+                .replaceAll("\\s+", "");  // Remove all whitespace including newlines
 
-        // Decode base64
-        byte[] decoded = Base64.getDecoder().decode(publicKeyPEM);
+        logger.debug("Processed public key length: {}", publicKeyPEM.length());
 
-        // Generate public key
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
+        // Decode the Base64 encoded string
+        byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
+
+        // Create the public key
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePublic(spec);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+        return keyFactory.generatePublic(keySpec);
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
-    }
-
-    public String extractRole(String token) {
-        final Claims claims = extractAllClaims(token);
-        return claims.get("role", String.class);
-    }
-
-    public String extractTokenType(String token) {
-        final Claims claims = extractAllClaims(token);
-        return claims.get("tokenType", String.class);
     }
 
     public Date extractExpiration(String token) {
@@ -79,68 +75,45 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parser()
+            JwtParser parser = Jwts.parser()
                     .verifyWith(publicKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+                    .build();
+            return parser.parseSignedClaims(token).getPayload();
         } catch (Exception e) {
-            logger.warn("Failed to parse JWT claims: {}", e.getMessage());
-            throw new RuntimeException("Failed to parse JWT token", e);
+            logger.error("Failed to parse JWT token: {}", e.getMessage());
+            throw new RuntimeException("Invalid JWT token", e);
         }
     }
 
     private Boolean isTokenExpired(String token) {
-        try {
-            return extractExpiration(token).before(new Date());
-        } catch (Exception e) {
-            logger.warn("Error checking token expiration: {}", e.getMessage());
-            return true; // Consider expired if we can't check
-        }
+        return extractExpiration(token).before(new Date());
     }
 
-    /**
-     * Validate RSA JWT token - checks signature, expiration, and token type
-     */
-    public Boolean validateToken(String token) {
-        try {
-            // Parse and validate signature (this will throw exception if invalid)
-            Jwts.parser()
-                    .verifyWith(publicKey)
-                    .build()
-                    .parseSignedClaims(token);
-
-            // Additional validation
-            if (isTokenExpired(token)) {
-                logger.debug("Token is expired");
-                return false;
-            }
-
-            // Ensure it's an access token (not refresh token)
-            String tokenType = extractTokenType(token);
-            if (!"ACCESS".equals(tokenType)) {
-                logger.debug("Token type is not ACCESS: {}", tokenType);
-                return false;
-            }
-
-            logger.debug("Token validation successful");
-            return true;
-        } catch (Exception e) {
-            logger.debug("JWT token validation failed: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Validate token for specific username
-     */
     public Boolean validateToken(String token, String username) {
         try {
             final String extractedUsername = extractUsername(token);
-            return extractedUsername.equals(username) && validateToken(token);
+            return (extractedUsername.equals(username) && !isTokenExpired(token));
         } catch (Exception e) {
-            logger.debug("JWT token validation failed for username {}: {}", username, e.getMessage());
+            logger.error("Token validation failed: {}", e.getMessage());
             return false;
+        }
+    }
+
+    public Boolean validateToken(String token) {
+        try {
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            logger.error("Token validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public String extractRole(String token) {
+        try {
+            return extractClaim(token, claims -> claims.get("role", String.class));
+        } catch (Exception e) {
+            logger.error("Failed to extract role from token: {}", e.getMessage());
+            return null;
         }
     }
 }
