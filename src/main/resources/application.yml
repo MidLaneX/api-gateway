@@ -41,6 +41,14 @@ spring:
                 - Path=/api/notifications/**
               filters:
                 - StripPrefix=0
+
+            # Collaboration service routes
+            - id: collab-service-route
+              uri: ${COLLAB_SERVICE_URL:http://localhost:8090}
+              predicates:
+                - Path=/api/collab/**
+              filters:
+                - StripPrefix=0
           globalcors:
             cors-configurations:
               '[/**]':

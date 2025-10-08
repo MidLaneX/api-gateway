@@ -21,6 +21,9 @@ public class GatewayConfig {
     @Value("${NOTIFICATION_SERVICE_URL:http://localhost:8084}")
     private String notificationServiceUrl;
 
+    @Value("${COLLAB_SERVICE_URL:http://localhost:8090}")
+    private String collabServiceUrl;
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -38,6 +41,11 @@ public class GatewayConfig {
                 .route("notification-service", r -> r
                         .path("/api/notifications/**")
                         .uri(notificationServiceUrl))
+
+                // Collaboration Service Routes
+                .route("collab-service", r -> r
+                        .path("/api/collab/**")
+                        .uri(collabServiceUrl))
 
                 .build();
     }
