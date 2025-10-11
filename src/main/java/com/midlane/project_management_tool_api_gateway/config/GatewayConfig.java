@@ -5,12 +5,14 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 public class GatewayConfig {
-
-    @Value("${cors.allowed.origins:http://localhost:3000}")
-    private String allowedOrigins;
 
     @Value("${USER_SERVICE_URL:http://localhost:8082}")
     private String userServiceUrl;
@@ -23,6 +25,34 @@ public class GatewayConfig {
 
     @Value("${COLLAB_SERVICE_URL:http://localhost:8090}")
     private String collabServiceUrl;
+
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        
+        // Allow all origins
+        corsConfig.addAllowedOriginPattern("*");
+        
+        // Allow all HTTP methods
+        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        
+        // Allow all headers
+        corsConfig.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Allow credentials (cookies, authorization headers)
+        corsConfig.setAllowCredentials(true);
+        
+        // Expose authorization header
+        corsConfig.setExposedHeaders(Arrays.asList("Authorization"));
+        
+        // Cache preflight response for 1 hour
+        corsConfig.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+
+        return new CorsWebFilter(source);
+    }
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
