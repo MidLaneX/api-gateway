@@ -1,35 +1,19 @@
-# Exclude build artifacts
 target/
-*.jar
-*.war
-
-# Exclude IDE files
-.idea/
-.vscode/
-*.iml
-*.iws
-*.ipr
-
-# Exclude OS files
-.DS_Store
-Thumbs.db
-
-# Exclude Git
+*.md
 .git/
 .gitignore
-
-# Exclude Docker files
-Dockerfile*
-docker-compose*
-
-# Exclude documentation
-*.md
-HELP.md
-GIT_COMMANDS.md
-
-# Exclude test reports
 *.log
 *.tmp
+.DS_Store
+Thumbs.db
+node_modules/
+.env*
+!.env.example
+*.iml
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.mvn/wrapper/maven-wrapper.jar
 
-# Exclude Maven local repository
-.m2/
