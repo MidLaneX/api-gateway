@@ -10,6 +10,14 @@ spring:
       server:
         webflux:
           routes:
+            # Route all auth service traffic to user service (v1)
+            - id: auth-service-route-v1
+              uri: ${USER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/auth/**
+              filters:
+                - StripPrefix=0
+
             # Route all auth service traffic to user service
             - id: auth-service-route
               uri: ${USER_SERVICE_URL:http://localhost:8082}
@@ -41,11 +49,20 @@ spring:
                 - Path=/api/notifications/**
               filters:
                 - StripPrefix=0
+
+            # Collaboration service routes
+            - id: collab-service-route
+              uri: ${COLLAB_SERVICE_URL:http://localhost:8090}
+              predicates:
+                - Path=/api/collab/**
+              filters:
+                - StripPrefix=0
           globalcors:
             cors-configurations:
               '[/**]':
                 allowedOrigins:
                   - "${FRONTEND_URL:http://localhost:3000}"
+                  - "http://localhost:3001"
                   - "http://localhost:5173"
                 allowedMethods:
                   - GET
@@ -57,6 +74,7 @@ spring:
                 allowedHeaders:
                   - "*"
                 allowCredentials: true
+                maxAge: 3600
 
 server:
   port: ${SERVER_PORT:8080}

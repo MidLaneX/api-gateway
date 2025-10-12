@@ -1,14 +1,15 @@
 package com.midlane.project_management_tool_api_gateway.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/fallback")
@@ -44,10 +45,10 @@ public class FallbackController {
         return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
     }
 
-    @GetMapping("/task-service")
-    public Mono<ResponseEntity<Map<String, Object>>> taskServiceFallback() {
+    @GetMapping("/collab-service")
+    public Mono<ResponseEntity<Map<String, Object>>> collabServiceFallback() {
         Map<String, Object> response = new HashMap<>();
-        response.put("error", "Task service is currently unavailable");
+        response.put("error", "Collaboration service is currently unavailable");
         response.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
         response.put("message", "Please try again later");
 
