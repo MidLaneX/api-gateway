@@ -56,7 +56,7 @@ spring:
               predicates:
                 - Path=/api/collab/**
               filters:
-                - StripPrefix=0
+                - RewritePath=/api/collab/(?<segment>.*), /api/${segment}
           globalcors:
             cors-configurations:
               '[/**]':

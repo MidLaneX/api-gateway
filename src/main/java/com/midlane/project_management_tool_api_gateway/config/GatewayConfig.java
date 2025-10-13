@@ -1,5 +1,7 @@
 package com.midlane.project_management_tool_api_gateway.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -8,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 public class GatewayConfig {
@@ -75,6 +75,7 @@ public class GatewayConfig {
                 // Collaboration Service Routes
                 .route("collab-service", r -> r
                         .path("/api/collab/**")
+                        .filters(f -> f.rewritePath("/api/collab/(?<segment>.*)", "/api/${segment}"))
                         .uri(collabServiceUrl))
 
                 .build();
