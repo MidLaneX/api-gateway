@@ -1,8 +1,10 @@
 package com.midlane.project_management_tool_api_gateway.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.midlane.project_management_tool_api_gateway.util.JwtUtil;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +18,13 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.midlane.project_management_tool_api_gateway.util.JwtUtil;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * JWT Authentication Filter for API Gateway
@@ -40,6 +42,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     // Public endpoints that don't require JWT verification
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
         "/api/auth/",
+        "/api/collab/ws/",
         "/actuator/health",
         "/actuator/info"
     );
@@ -126,8 +129,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             return true;
         }
 
-        // Check for path prefixes (especially for auth endpoints)
+        // Check for path prefixes (especially for auth endpoints and websocket)
         return path.startsWith("/api/auth/") ||
+               path.startsWith("/api/collab/ws/") ||
                path.equals("/actuator/health") ||
                path.equals("/actuator/info");
     }

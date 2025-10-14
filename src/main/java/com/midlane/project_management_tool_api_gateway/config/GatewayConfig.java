@@ -1,5 +1,7 @@
 package com.midlane.project_management_tool_api_gateway.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -8,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 public class GatewayConfig {
@@ -72,9 +72,16 @@ public class GatewayConfig {
                         .path("/api/notifications/**")
                         .uri(notificationServiceUrl))
 
-                // Collaboration Service Routes
+                // WebSocket route for collaboration service - must come first
+                .route("collab-websocket", r -> r
+                        .path("/api/collab/ws/**")
+                        .filters(f -> f.rewritePath("/api/collab/(?<segment>.*)", "/${segment}"))
+                        .uri(collabServiceUrl))
+
+                // Collaboration Service HTTP Routes
                 .route("collab-service", r -> r
                         .path("/api/collab/**")
+                        .filters(f -> f.rewritePath("/api/collab/(?<segment>.*)", "/api/${segment}"))
                         .uri(collabServiceUrl))
 
                 .build();

@@ -50,13 +50,22 @@ spring:
               filters:
                 - StripPrefix=0
 
-            # Collaboration service routes
+            # Collaboration service routes - WebSocket and REST API
+            # WebSocket route must come first to match /ws paths
+            - id: collab-websocket-route
+              uri: ${COLLAB_SERVICE_URL:http://localhost:8090}
+              predicates:
+                - Path=/api/collab/ws/**
+              filters:
+                - RewritePath=/api/collab/(?<segment>.*), /${segment}
+            
+            # Collaboration service REST API routes
             - id: collab-service-route
               uri: ${COLLAB_SERVICE_URL:http://localhost:8090}
               predicates:
                 - Path=/api/collab/**
               filters:
-                - StripPrefix=0
+                - RewritePath=/api/collab/(?<segment>.*), /api/${segment}
           globalcors:
             cors-configurations:
               '[/**]':
