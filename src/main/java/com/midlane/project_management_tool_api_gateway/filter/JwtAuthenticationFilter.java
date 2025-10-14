@@ -40,6 +40,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     // Public endpoints that don't require JWT verification
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
         "/api/auth/",
+        "/api/collab/ws/",
         "/actuator/health",
         "/actuator/info"
     );
@@ -126,8 +127,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             return true;
         }
 
-        // Check for path prefixes (especially for auth endpoints)
+        // Check for path prefixes (especially for auth endpoints and websocket)
         return path.startsWith("/api/auth/") ||
+               path.startsWith("/api/collab/ws/") ||
                path.equals("/actuator/health") ||
                path.equals("/actuator/info");
     }

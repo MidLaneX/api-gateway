@@ -72,7 +72,13 @@ public class GatewayConfig {
                         .path("/api/notifications/**")
                         .uri(notificationServiceUrl))
 
-                // Collaboration Service Routes
+                // WebSocket route for collaboration service - must come first
+                .route("collab-websocket", r -> r
+                        .path("/api/collab/ws/**")
+                        .filters(f -> f.rewritePath("/api/collab/(?<segment>.*)", "/${segment}"))
+                        .uri(collabServiceUrl))
+
+                // Collaboration Service HTTP Routes
                 .route("collab-service", r -> r
                         .path("/api/collab/**")
                         .filters(f -> f.rewritePath("/api/collab/(?<segment>.*)", "/api/${segment}"))
