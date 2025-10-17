@@ -69,7 +69,7 @@ public class GatewayConfig {
 
                 // Notification Service Routes
                 .route("notification-service", r -> r
-                        .path("/api/notifications/**")
+                        .path("/api/v1/notifications/**")
                         .uri(notificationServiceUrl))
 
                 // WebSocket route for collaboration service - must come first
